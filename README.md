@@ -2,7 +2,7 @@
 
 A web-based calculator for estimating Service Unit (SU) charges on [NCSA DeltaAI](https://docs.ncsa.illinois.edu/systems/deltaai/en/latest/), hosted via GitHub Pages.
 
-**[Live Site](https://ncsa.github.io/deltaai-charging-estimation/)** *(update this URL after deploying)*
+**[Live Site](https://biboyqg.github.io/deltaai-charging-estimation/)**
 
 ## How It Works
 
