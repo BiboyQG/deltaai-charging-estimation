@@ -10,16 +10,18 @@ DeltaAI bills jobs in **Service Units (SU)**, where **1 SU = 1 GH200 superchip u
 
 Each DeltaAI node contains 4 NVIDIA GH200 Grace Hopper superchips. Each GH200 provides:
 
-| Resource | Per GH200             |
-| -------- | --------------------- |
-| GPU      | 1 x H100 (96 GB HBM3) |
-| CPU      | 72 Grace ARM cores    |
-| Memory   | 120 GB LPDDR5         |
+| Resource   | Per GH200                  |
+| ---------- | -------------------------- |
+| GPU        | 1 x H100 (96 GB HBM3)      |
+| CPU        | 72 Grace ARM cores         |
+| CPU Memory | 110 GB (Slurm-schedulable) |
+
+> **NVIDIA CDMM (enabled June 24, 2026):** CPU and GPU memory are managed coherently but are no longer combined for Slurm scheduling. Slurm enforces memory based on CPU memory only — **110 GB per GPU / 440 GB per node**. Each requested GPU separately allocates its own 96 GB of HBM3 GPU memory, independent of the `--mem` value. If you previously relied on combined CPU+GPU memory, lower your `--mem` request accordingly.
 
 The number of GH200s billed is determined by whichever resource dimension requires the most GH200 equivalents:
 
 ```
-GH200s per node = max(GPUs requested, ceil(CPUs / 72), ceil(Memory_GB / 120))
+GH200s per node = max(GPUs requested, ceil(CPUs / 72), ceil(Memory_GB / 110))
 
 Charge (SU) = GH200s_per_node x nodes x wall_hours x partition_factor
 ```
@@ -39,7 +41,7 @@ Enter your SLURM job parameters:
 - **GPUs per node** — H100 GPUs per node (0–4)
 - **Tasks per node** — `--ntasks-per-node`
 - **CPUs per task** — `--cpus-per-task`
-- **Memory per node** — in GB (up to 480 GB)
+- **Memory per node** — in GB (up to 440 GB)
 - **Wall time** — in hours or minutes
 - **Partition** — `ghx4` or `ghx4-interactive`
 

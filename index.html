@@ -576,7 +576,7 @@
     <div class="header-info">
       <div class="header-info-inner">
         <span><strong>1 SU</strong> = 1 GH200 &times; 1 hour</span>
-        <span><strong>Node</strong> = 4 GH200 superchips (4 H100 GPUs, 288 cores, 480 GB)</span>
+        <span><strong>Node</strong> = 4 GH200 superchips (4 H100 GPUs, 288 cores, 440 GB)</span>
         <span><strong>Billing</strong> = max(GPU, CPU, Memory) weighted</span>
       </div>
     </div>
@@ -624,7 +624,7 @@
               <div class="form-group">
                 <label>Memory per node <span class="hint">(GB)</span></label>
                 <div class="input-wrap">
-                  <input type="number" id="mem" value="120" min="1" max="480" step="1" class="has-unit">
+                  <input type="number" id="mem" value="110" min="1" max="440" step="1" class="has-unit">
                   <span class="unit">GB</span>
                 </div>
                 <div class="validation-msg" id="mem-msg"></div>
@@ -678,7 +678,7 @@
                 <div class="spec-label">CPU Cores</div>
               </div>
               <div class="spec-item">
-                <div class="spec-val">480</div>
+                <div class="spec-val">440</div>
                 <div class="spec-label">GB Memory</div>
               </div>
               <div class="spec-item">
@@ -687,7 +687,7 @@
               </div>
             </div>
             <p style="margin-top:0.75rem; font-size:0.82rem">
-              Each node contains 4 NVIDIA GH200 Grace Hopper superchips. Each GH200 pairs one H100 GPU (96 GB HBM3) with a 72-core Grace ARM CPU and 120 GB LPDDR5 memory.
+              Each node contains 4 NVIDIA GH200 Grace Hopper superchips. Each GH200 pairs one H100 GPU (96 GB HBM3) with a 72-core Grace ARM CPU and 120 GB LPDDR5 memory. With NVIDIA CDMM enabled (June 24, 2026), Slurm schedules and bills CPU memory only &mdash; 110 GB per GPU (440 GB/node) &mdash; while each requested GPU separately allocates its own 96 GB of GPU memory.
             </p>
           </div>
         </div>
@@ -738,7 +738,7 @@
           <div class="formula-section">
             <h3>Formula</h3>
             <div class="formula-box" id="formula-box">
-              GH200s = <span class="highlight">max</span>(GPUs, &lceil;CPUs &frasl; 72&rceil;, &lceil;Mem<sub>GB</sub> &frasl; 120&rceil;) &times; nodes<br>
+              GH200s = <span class="highlight">max</span>(GPUs, &lceil;CPUs &frasl; 72&rceil;, &lceil;Mem<sub>GB</sub> &frasl; 110&rceil;) &times; nodes<br>
               Charge (SU) = GH200s &times; <span class="highlight">wall_time</span><sub>hr</sub> &times; partition_factor
               <span class="formula-equiv">&equiv; billing &times; elapsed<sub>sec</sub> &frasl; 3,600,000<br>where billing = GH200s &times; 1000 &times; partition_factor</span>
             </div>
@@ -752,7 +752,7 @@
               <span class="flag">#SBATCH</span> <span class="val">--gpus-per-node=1</span><br>
               <span class="flag">#SBATCH</span> <span class="val">--ntasks-per-node=1</span><br>
               <span class="flag">#SBATCH</span> <span class="val">--cpus-per-task=1</span><br>
-              <span class="flag">#SBATCH</span> <span class="val">--mem=120G</span><br>
+              <span class="flag">#SBATCH</span> <span class="val">--mem=110G</span><br>
               <span class="flag">#SBATCH</span> <span class="val">--time=01:00:00</span><br>
               <span class="flag">#SBATCH</span> <span class="val">--partition=ghx4</span>
             </div>
@@ -769,6 +769,20 @@
           Frequently Asked Questions
         </div>
         <div class="card-body" style="padding:0">
+
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+              <span>Why is the maximum schedulable memory 440 GB per node (110 GB per GPU) and not 480 GB?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="faq-answer-wrapper">
+              <div class="faq-answer">
+                <div class="faq-answer-content">
+                  <p>As of the <strong>June 24, 2026</strong> maintenance, DeltaAI enabled NVIDIA <strong>CDMM</strong> (Coherent Device Memory Management). CPU (OS) memory and GPU memory are now managed coherently but are <strong>no longer combined</strong> for Slurm scheduling limits. Slurm enforces memory based on available CPU memory only &mdash; <strong>110 GB per GPU, or 440 GB per node</strong> &mdash; rather than the previous combined pool. Each requested GPU still allocates its own <strong>96 GB</strong> of GPU memory (HBM3) separately from the <code>--mem</code> value you request from Slurm. If you have workflows that previously relied on combined CPU+GPU memory, lower your <code>--mem</code> request accordingly &mdash; a job requesting more CPU memory than Slurm now reports as available may remain pending until adjusted. The billing unit is otherwise unchanged: <strong>1/4 node = 1 GH200 = 1 H100 GPU + 72 CPU cores + 110 GB CPU memory</strong>.</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="faq-item">
             <button class="faq-question" onclick="toggleFaq(this)">
@@ -841,10 +855,10 @@
   <script>
     // Per GH200 specs
     const CORES_PER_GH200 = 72;
-    const MEM_PER_GH200_GB = 120;
+    const MEM_PER_GH200_GB = 110;
     const GPUS_PER_NODE = 4;
     const CORES_PER_NODE = 288;
-    const MEM_PER_NODE_GB = 480;
+    const MEM_PER_NODE_GB = 440;
     const MAX_NODES = 152;
 
     const PARTITION_FACTORS = {
@@ -968,7 +982,7 @@
 
       document.getElementById('val-gpu').textContent = `${totalGpuGH200} (${gpusPerNode} GPU/node)`;
       document.getElementById('val-cpu').textContent = `${totalCpuGH200} (${cpusPerNode} CPU/node ÷ 72)`;
-      document.getElementById('val-mem').textContent = `${totalMemGH200} (${memPerNode} GB/node ÷ 120)`;
+      document.getElementById('val-mem').textContent = `${totalMemGH200} (${memPerNode} GB/node ÷ 110)`;
       document.getElementById('val-billed').textContent = total_gh200;
       document.getElementById('val-time').textContent = hours.toFixed(2) + ' hr';
       document.getElementById('val-factor').textContent = factor + 'x (' + partition + ')';
